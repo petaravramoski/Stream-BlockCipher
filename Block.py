@@ -6,7 +6,7 @@ import string
 from sbox import S_box
 
 #INPUT STRING
-x = "PetarsPasword./JSDGKFMxdfd"
+x = "This is the secret messagethat is going to be encryprted with a block cipher: SGKLSNDFSFLKSFNDS"
 
 #debug check size 
 #print(len(x))
