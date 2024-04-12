@@ -6,7 +6,7 @@ import string
 from sbox import S_box
 
 #INPUT STRING
-x = "This is the secret messagethat is going to be encryprted with a block cipher: SGKLSNDFSFLKSFNDS"
+x = "The password to eddies account is: SDFKLsdnv#)#$NSFxdvsdfd"
 
 #debug check size 
 #print(len(x))
@@ -14,9 +14,9 @@ x = "This is the secret messagethat is going to be encryprted with a block ciphe
 print("text that is going to be encrypted: ", x)
 #input block size
 blockSize = 8 #Size of block
-num_rounds = 3 #number of rounds that we will encrypt/decrypt 
+num_rounds = 8 #number of rounds that we will encrypt/decrypt 
 asciiNum = 97
-
+numberOfRotations = 1
 # Order of chars in block (index order) for first permutation
 permutationOrderOne = [3, 5, 1, 2, 6, 0, 4, 7]
 
@@ -37,6 +37,20 @@ def pad_last_block(block, block_size, padding_char='a'):
     else:
         padded_block = block
     return padded_block
+
+
+def rotate_right(arr, n):
+    if n > len(arr):
+        n = n % len(arr)
+    arr = (arr[-n:] + arr[:-n])
+    return arr
+
+
+def rotate_left(arr, n):
+    if n > len(arr):
+        n = n % len(arr)
+    arr = arr[n:] + arr[:n]
+    return arr
 
 #Update blockExtract to use the padded last block
 #using Pad function to pad last block if its not size 8
@@ -145,18 +159,21 @@ plaintext_after_inverse_substitution = inverse_substitution(subBlocks, inverse_S
 
 
 def encrypt_with_key_mixing(blocks, permutation_order, keys, num_rounds):
-    encrypted_blocks = blocks[:]  #Making a copy of the original blocks
+    encrypted_blocks = blocks[:]  # Making a copy of the original blocks
     
     for _ in range(num_rounds):
         round_encrypted_blocks = []  # Temporary list to store the blocks after each round
         
         for i, block in enumerate(encrypted_blocks):
+            # Rotate the block once to the right
+            block = rotate_right(block, 1)
+            
             # Apply initial permutation
             permuted_block = ''.join(block[index] for index in permutation_order) 
             
             # Perform substitution using the S-box
             substituted_block = ''.join(S_box[char] for char in permuted_block)
-            
+
             # Mix the block with the corresponding key using modular addition
             mixed_block = ''
             for char, key_char in zip(substituted_block, keys[i]):
@@ -170,7 +187,7 @@ def encrypt_with_key_mixing(blocks, permutation_order, keys, num_rounds):
                     x_char = ord(char) - ord('0')
                     key_char = ord(key_char) - ord('0')
                 else:
-                    # Handle other characters (e.g., digits, punctuation, whitespace)
+                    #Incase theres a char not recognized 
                     mixed_block += char
                     continue
 
@@ -201,7 +218,7 @@ for block in encryptedBlock:
 
 
 def decrypt_with_key_mixing(encrypted_blocks, keys, inverse_S_box, permutation_order, num_rounds):
-    decrypted_blocks = encrypted_blocks[:] #Making a copy of the encrypted blocks
+    decrypted_blocks = encrypted_blocks[:] # Making a copy of the encrypted blocks
     
     for _ in range(num_rounds):
         round_decrypted_blocks = []  # Temporary list to store the blocks after each round
@@ -217,7 +234,7 @@ def decrypt_with_key_mixing(encrypted_blocks, keys, inverse_S_box, permutation_o
                 elif char.isdigit():
                     result = (ord(char) - ord(key_char)) % 10 + 48
                 else:
-                    # Handle other characters (e.g., punctuation, whitespace)
+                    #Incase theres a char not recognized 
                     result = ord(char)
                 decrypted_block += chr(result)
             
@@ -226,6 +243,9 @@ def decrypt_with_key_mixing(encrypted_blocks, keys, inverse_S_box, permutation_o
             
             # Apply inverse permutation
             inv_permuted_block = inversePermutation([substituted_block], permutation_order)[0]
+            
+            # Rotate the block once to the left
+            inv_permuted_block = rotate_left(inv_permuted_block, 1)
             
             # Append the block to the list of decrypted blocks for this round
             round_decrypted_blocks.append(inv_permuted_block)
@@ -238,7 +258,14 @@ def decrypt_with_key_mixing(encrypted_blocks, keys, inverse_S_box, permutation_o
 # Perform decryption with key mixing using keys stored in keyForEachBlock
 decrypted_blocks = decrypt_with_key_mixing(encryptedBlock, keyForEachBlock, inverse_S_box, permutationOrderOne, num_rounds)
 
+
+# Perform decryption with key mixing using keys stored in keyForEachBlock
+decrypted_blocks = decrypt_with_key_mixing(encryptedBlock, keyForEachBlock, inverse_S_box, permutationOrderOne, num_rounds)
+
 print('Decrypted Blocks with Key Mixing:', *[block for block in decrypted_blocks])
+
+print('Decrypted Blocks with Key Mixing:', ''.join([block for block in decrypted_blocks]))
+
 
 
 
