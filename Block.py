@@ -6,7 +6,12 @@ import string
 from sbox import S_box
 
 #INPUT STRING
-x = "The password to eddies account is: SDFKLsdnv#)#$NSFxdvsdfd"
+x = ""
+
+
+x = input("Enter the text to be encrypted (or press Enter for default): ")
+if not x:
+    x = "Exams are on red USB drive in JO 18.103. Password is CaKe314."
 
 #debug check size 
 #print(len(x))
@@ -55,6 +60,8 @@ def rotate_left(arr, n):
 #Update blockExtract to use the padded last block
 #using Pad function to pad last block if its not size 8
 blockExtract = [pad_last_block(x[i:i+blockSize], blockSize) for i in range(0, len(x), blockSize)]
+
+print("The texts extracted into blocks of 8: ", blockExtract)
 
 #This function generates a random key for 
 def generate_random_key(length):
@@ -117,7 +124,7 @@ def substitution(input_block, S_box):
 #Where the substitution chars are stored and passed down 
 subBlocks = substitution(initialPermutationResult, S_box)
 
-print("Sub blocks:", subBlocks)
+print("Initial Substitution:", subBlocks)
 
 
 #how this one works: 
@@ -212,9 +219,7 @@ def encrypt_with_key_mixing(blocks, permutation_order, keys, num_rounds):
 encryptedBlock = encrypt_with_key_mixing(blockExtract, permutationOrderOne, keyForEachBlock, num_rounds)
 
 # Print the encrypted blocks
-print('Encrypted Blocks with Key Mixing:')
-for block in encryptedBlock:
-    print(block) 
+print('Encrypted Blocks with Key Mixing:', encryptedBlock)
 
 
 def decrypt_with_key_mixing(encrypted_blocks, keys, inverse_S_box, permutation_order, num_rounds):
@@ -258,11 +263,8 @@ def decrypt_with_key_mixing(encrypted_blocks, keys, inverse_S_box, permutation_o
 # Perform decryption with key mixing using keys stored in keyForEachBlock
 decrypted_blocks = decrypt_with_key_mixing(encryptedBlock, keyForEachBlock, inverse_S_box, permutationOrderOne, num_rounds)
 
-
-# Perform decryption with key mixing using keys stored in keyForEachBlock
-decrypted_blocks = decrypt_with_key_mixing(encryptedBlock, keyForEachBlock, inverse_S_box, permutationOrderOne, num_rounds)
-
 print('Decrypted Blocks with Key Mixing:', *[block for block in decrypted_blocks])
+
 
 print('Decrypted Blocks with Key Mixing:', ''.join([block for block in decrypted_blocks]))
 
